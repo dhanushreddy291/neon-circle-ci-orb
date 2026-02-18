@@ -1,0 +1,65 @@
+description: >
+  Creates a new Neon branch (or reuses an existing one with the same name),
+  waits for its compute endpoint, and exports connection variables
+  (DATABASE_URL, PGHOST, etc.) to the environment.
+parameters:
+  api_key:
+    description: Environment variable that holds the Neon API key.
+    type: env_var_name
+    default: NEON_API_KEY
+  project_id:
+    description: Environment variable that holds the Neon project ID.
+    type: env_var_name
+    default: NEON_PROJECT_ID
+  parent_branch:
+    description: Parent branch name or ID to fork from. Leave empty to use the project's default branch.
+    type: string
+    default: ""
+  branch_name:
+    description: Custom branch name. Leave empty for an auto-generated name (`<CI_PIPELINE_ID>`). If a branch with the same name already exists, it will be reused instead of creating a new one.
+    type: string
+    default: ""
+  role:
+    description: Database role to use for connection.
+    type: string
+    default: neondb_owner
+  database:
+    description: Database name.
+    type: string
+    default: neondb
+  password:
+    description: Password for the role. Leave empty to retrieve from the Neon API (only works if the chosen role has `store_passwords` enabled).
+    type: string
+    default: ""
+  ttl_seconds:
+    description: Branch TTL in seconds. Set 0 to disable auto-expiry. Default is 3600 (1 hour).
+    type: integer
+    default: 3600
+  schema_only:
+    description: If true, creates a schema-only branch.
+    type: boolean
+    default: false
+  get_auth_url:
+    description: Export NEON_AUTH_URL when Neon Auth is enabled.
+    type: boolean
+    default: false
+  get_data_api_url:
+    description: Export NEON_DATA_API_URL when Data API is enabled.
+    type: boolean
+    default: false
+steps:
+  - run:
+      name: Neon - Create Branch
+      environment:
+        PARAM_API_KEY: << parameters.api_key >>
+        PARAM_PROJECT_ID: << parameters.project_id >>
+        PARAM_PARENT_BRANCH: << parameters.parent_branch >>
+        PARAM_BRANCH_NAME: << parameters.branch_name >>
+        PARAM_ROLE: << parameters.role >>
+        PARAM_DATABASE: << parameters.database >>
+        PARAM_PASSWORD: << parameters.password >>
+        PARAM_TTL_SECONDS: "<< parameters.ttl_seconds >>"
+        PARAM_SCHEMA_ONLY: "<< parameters.schema_only >>"
+        PARAM_GET_AUTH: "<< parameters.get_auth_url >>"
+        PARAM_GET_DATA_API: "<< parameters.get_data_api_url >>"
+      command: <<include(scripts/create-branch.sh)>>

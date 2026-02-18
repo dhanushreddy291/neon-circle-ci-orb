@@ -1,0 +1,93 @@
+description: >
+  Full lifecycle job: creates an ephemeral Neon branch, runs migrations,
+  runs tests, and deletes the branch even if tests fail.
+parameters:
+
+  # Executor and resource class parameters
+  executor:
+    description: Executor for the job. Override to match your project runtime.
+    type: executor
+    default: default
+  resource_class:
+    description: CircleCI resource class.
+    type: string
+    default: small
+
+  # Neon project and branch parameters
+  api_key:
+    description: Environment variable that holds the Neon API key.
+    type: env_var_name
+    default: NEON_API_KEY
+  project_id:
+    description: Environment variable that holds the Neon project ID.
+    type: env_var_name
+    default: NEON_PROJECT_ID
+  parent_branch:
+    description: Parent branch to fork from.
+    type: string
+    default: ""
+  role:
+    description: Database role to use.
+    type: string
+    default: neondb_owner
+  database:
+    description: Database name.
+    type: string
+    default: neondb
+  password:
+    description: Password for the role. Leave empty to retrieve from the Neon API (only works if the chosen role has `store_passwords` enabled).
+    type: string
+    default: ""
+  ttl_seconds:
+    description: Branch lifespan in seconds as a safety net. Set 0 to disable.
+    type: integer
+    default: 3600
+  schema_only:
+    description: Create a schema-only branch.
+    type: boolean
+    default: false
+  get_auth_url:
+    description: Retrieve and export NEON_AUTH_URL when Neon Auth is enabled.
+    type: boolean
+    default: false
+  get_data_api_url:
+    description: Retrieve and export NEON_DATA_API_URL when Data API is enabled.
+    type: boolean
+    default: false
+  migrate_command:
+    description: Command to prepare the database (for example, npm run db:migrate).
+    type: string
+  test_command:
+    description: Command to run tests (for example, npm test).
+    type: string
+executor: << parameters.executor >>
+resource_class: << parameters.resource_class >>
+steps:
+  # Checkout the code
+  - checkout
+
+  # Create Neon branch and set environment variables
+  - create-branch:
+      api_key: << parameters.api_key >>
+      project_id: << parameters.project_id >>
+      parent_branch: << parameters.parent_branch >>
+      role: << parameters.role >>
+      database: << parameters.database >>
+      password: << parameters.password >>
+      ttl_seconds: << parameters.ttl_seconds >>
+      schema_only: << parameters.schema_only >>
+      get_auth_url: << parameters.get_auth_url >>
+      get_data_api_url: << parameters.get_data_api_url >>
+
+  # Run migrations and tests
+  - run:
+      name: Run Migrations
+      command: << parameters.migrate_command >>
+  - run:
+      name: Run Tests
+      command: << parameters.test_command >>
+
+  # Delete the Neon branch
+  - delete-branch:
+      api_key: << parameters.api_key >>
+      project_id: << parameters.project_id >>

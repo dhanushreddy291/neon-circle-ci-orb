@@ -1,13 +1,12 @@
 description: >
-  Sample example description.
-# Provide a use-case based example for using this orb.
-# Everything in the `usage` section will be displayed in the orb registry.
-# Comments are not retained.
+  Run migrations and tests against an ephemeral Neon branch in CI.
 usage:
   version: 2.1
   orbs:
-    <orb-name>: <namespace>/<orb-name>@1.2.3
+    neon: dhanushreddy291/neon@dev:first
   workflows:
-    use-my-orb:
+    test:
       jobs:
-        - <orb-name>/<job-name>
+        - neon/run-tests:
+            migrate_command: npm run db:migrate
+            test_command: npm test

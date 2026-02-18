@@ -1,34 +1,11 @@
 version: 2.1
+
+# Example standalone test pipeline for the Neon orb.
+# Use this when you want to manually validate the dev orb version.
 orbs:
-  orb-tools: circleci/orb-tools@12.3
-  neon: {}
-
-# Use this tag to ensure test jobs always run,
-# even though the downstream publish job will only run on release tags.
-filters: &filters
-  tags:
-    only: /.*/
-
-# Filter for release tags.
-release-filters: &release-filters
-  branches:
-    ignore: /.*/
-  tags:
-    only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+  neon: dhanushreddy291/neon@dev:first
 
 jobs:
-  smoke-test:
-    docker:
-      - image: cimg/base:current
-    steps:
-      - checkout
-      - run:
-          name: Validate source tree contains Neon commands
-          command: |
-            test -f src/commands/create-branch.yml
-            test -f src/commands/delete-branch.yml
-            test -f src/commands/reset-branch.yml
-
   test-create-delete:
     docker:
       - image: cimg/base:stable
@@ -115,21 +92,13 @@ jobs:
             fi
 
       - neon/delete-branch
+
 workflows:
-  test-deploy:
+  test-everything:
     jobs:
-      - smoke-test:
-          filters: *filters
+      - test-create-delete
 
-      - test-create-delete:
-          filters: *filters
-          requires:
-            - smoke-test
-
-      - test-idempotent-create:
-          filters: *filters
-          requires:
-            - smoke-test
+      - test-idempotent-create
 
       - neon/run-tests:
           migrate_command: 'echo ''Running migrations against Neon branch...'' && echo "DATABASE_URL is set: $(echo $DATABASE_URL | head -c 30)..."'
@@ -137,18 +106,3 @@ workflows:
           ttl_seconds: 600
           requires:
             - test-create-delete
-          filters: *filters
-
-      # The orb must be re-packed for publishing, and saved to the workspace.
-      - orb-tools/pack:
-          filters: *release-filters
-      - orb-tools/publish:
-          orb_name: dhanushreddy291/neon
-          vcs_type: << pipeline.project.type >>
-          pub_type: production
-          # Ensure this job requires all test jobs and the pack job.
-          requires:
-            - orb-tools/pack
-            - smoke-test
-          context: orb-publishing
-          filters: *release-filters

@@ -1,0 +1,29 @@
+description: >
+  Resets a Neon branch to the latest state of its parent branch.
+  Useful for refreshing long-lived branches (staging, dev) with latest data.
+  This command does not export DATABASE_URL or related variables.
+parameters:
+  api_key:
+    description: Environment variable that holds the Neon API key.
+    type: env_var_name
+    default: NEON_API_KEY
+  project_id:
+    description: Environment variable that holds the Neon project ID.
+    type: env_var_name
+    default: NEON_PROJECT_ID
+  branch_id:
+    description: Branch ID or branch name to reset.
+    type: string
+  parent_branch:
+    description: Parent branch name or ID to reset to. Empty uses original parent.
+    type: string
+    default: ""
+steps:
+  - run:
+      name: Neon - Reset Branch
+      environment:
+        PARAM_API_KEY: << parameters.api_key >>
+        PARAM_PROJECT_ID: << parameters.project_id >>
+        PARAM_BRANCH_ID: << parameters.branch_id >>
+        PARAM_PARENT_BRANCH: << parameters.parent_branch >>
+      command: <<include(scripts/reset-branch.sh)>>

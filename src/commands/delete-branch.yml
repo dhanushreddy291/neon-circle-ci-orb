@@ -1,0 +1,25 @@
+description: >
+  Deletes a Neon branch. Typically used as cleanup after tests.
+  Defaults to the branch created by create-branch.
+parameters:
+  api_key:
+    description: Environment variable that holds the Neon API key.
+    type: env_var_name
+    default: NEON_API_KEY
+  project_id:
+    description: Environment variable that holds the Neon project ID.
+    type: env_var_name
+    default: NEON_PROJECT_ID
+  branch_id:
+    description: Branch ID to delete. Defaults to NEON_BRANCH_ID from create-branch.
+    type: string
+    default: ""
+steps:
+  - run:
+      name: Neon - Delete Branch
+      environment:
+        PARAM_API_KEY: << parameters.api_key >>
+        PARAM_PROJECT_ID: << parameters.project_id >>
+        PARAM_BRANCH_ID: << parameters.branch_id >>
+      when: always
+      command: <<include(scripts/delete-branch.sh)>>

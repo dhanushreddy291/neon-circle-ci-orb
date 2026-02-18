@@ -1,62 +1,215 @@
-# Orb Template
+# 🟢 Neon CircleCI Orb
 
+[![CircleCI Build Status](https://circleci.com/gh/dhanushreddy291/neon-circle-ci-orb.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/dhanushreddy291/neon-circle-ci-orb)
+[![CircleCI Orb Version](https://badges.circleci.com/orbs/dhanushreddy291/neon.svg)](https://circleci.com/developer/orbs/orb/dhanushreddy291/neon)
+[![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/dhanushreddy291/neon-circle-ci-orb/master/LICENSE)
 
-[![CircleCI Build Status](https://circleci.com/gh/dhanushreddy291/neon-circle-ci-orb.svg?style=shield "CircleCI Build Status")](https://circleci.com/gh/dhanushreddy291/neon-circle-ci-orb) [![CircleCI Orb Version](https://badges.circleci.com/orbs/dhanushreddy291/neon-orb-test.svg)](https://circleci.com/developer/orbs/orb/dhanushreddy291/neon-orb-test) [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/dhanushreddy291/neon-circle-ci-orb/master/LICENSE) [![CircleCI Community](https://img.shields.io/badge/community-CircleCI%20Discuss-343434.svg)](https://discuss.circleci.com/c/ecosystem/orbs)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://neon.com/brand/neon-logo-dark-color.svg">
+    <img alt="Neon logo" src="https://neon.com/brand/neon-logo-light-color.svg" width="200">
+  </picture>
+</p>
 
+This Orb allows you to easily manage **ephemeral Neon Postgres branches** within
+your CircleCI pipelines.
 
+It enables workflows where you can instantly provision an isolated database for
+every CI run, run migrations and tests, and automatically clean it up
+afterwards. This is perfect for testing, preview environments, and database
+schema validation.
 
-A project template for Orbs.
+## 🚀 Features
 
-This repository is designed to be automatically ingested and modified by the CircleCI CLI's `orb init` command.
+- **`create-branch`**: Create a new copy-on-write branch from your production or
+  staging database.
+- **`delete-branch`**: Clean up branches after your pipeline finishes.
+- **`reset-branch`**: Reset a long-lived branch (like staging) to the latest
+  production state.
+- **`run-tests`**: A complete, pre-configured job that handles the full
+  lifecycle: create branch → run tests → delete branch.
 
-_**Edit this area to include a custom title and description.**_
+## ⚙️ Setup
 
----
+Using this Orb requires a Neon API Key.
+
+1. **Obtain a Neon API key:**
+   - Log in to the [Neon Console](https://console.neon.tech).
+   - Go to your Account Profile > **API Keys**.
+   - Create a new API key.
+
+2. **Add Secrets to CircleCI:**
+   - Go to your Project Settings in CircleCI.
+   - Navigate to **Environment Variables**.
+   - Add the following variables:
+     - `NEON_API_KEY`: Your Neon API key.
+     - `NEON_PROJECT_ID`: The ID of your Neon project (found in the Settings >
+       General tab of your Neon dashboard).
+
+   <p align="left">
+      <img src="./assets/circleci-env-vars.png" alt="CircleCI Environment Variables" width="900">
+    </p>
+
+3. **Import the Orb:** Add the orb to your `.circleci/config.yml`:
+
+   ```yaml
+   version: 2.1
+
+   orbs:
+     neon: dhanushreddy291/neon@1.0 # Use the latest version from the CircleCI Orb Registry
+   ```
+
+## 📖 Usage
+
+### Option 1: Run all tests with `run-tests`
+
+The easiest way to get started is using the `run-tests` job. It automatically
+creates a branch, runs your migration and test commands, and ensures the branch
+is deleted even if tests fail.
+
+```yaml
+workflows:
+  test-flow:
+    jobs:
+      - neon/run-tests:
+          project_id: NEON_PROJECT_ID
+          migrate_command: npm i && npm run db:migrate
+          test_command: npm test
+```
+
+### Option 2: Manual Branch Management
+
+For more control, you can use the individual steps in your own jobs.
+
+```yaml
+jobs:
+  test-manual:
+    docker:
+      - image: cimg/node:lts
+
+    steps:
+      - checkout
+
+      - neon/create-branch:
+          project_id: NEON_PROJECT_ID
+          # Optional: branch_name: "ci-custom-name"
+
+      - run:
+          name: Run Migrations and Tests
+          command: |
+            echo "Connecting to $PGHOST..."
+            npm run db:migrate
+            npm test
+
+      - neon/delete-branch:
+          when: always
+```
+
+## 🔧 Commands
+
+### `create-branch`
+
+Creates a new Neon branch and exports connection variables (`DATABASE_URL`,
+`PGHOST`, `PGPASSWORD`, etc.) to the environment for subsequent steps.
+
+| Parameter          | Type         | Default            | Description                                          |
+| ------------------ | ------------ | ------------------ | ---------------------------------------------------- |
+| `project_id`       | env_var_name | `NEON_PROJECT_ID`  | Env var containing the Neon Project ID.              |
+| `api_key`          | env_var_name | `NEON_API_KEY`     | Env var containing the Neon API Key.                 |
+| `branch_name`      | string       | (Auto-generated)   | Custom name for the branch.                          |
+| `parent_branch`    | string       | (Default branch)   | The parent branch to fork from.                      |
+| `role`             | string       | `neondb_owner`     | The database role to use.                            |
+| `database`         | string       | `neondb`           | The database name.                                   |
+| `password`         | string       | (Fetched from API) | Password for the selected role.                      |
+| `ttl_seconds`      | integer      | `3600`             | Safety limit: branch auto-deletes after this time.   |
+| `schema_only`      | boolean      | `false`            | Create a schema-only branch.                         |
+| `get_auth_url`     | boolean      | `false`            | Export `NEON_AUTH_URL` when Neon Auth is enabled.    |
+| `get_data_api_url` | boolean      | `false`            | Export `NEON_DATA_API_URL` when Data API is enabled. |
+
+### `delete-branch`
+
+Deletes a Neon branch. Defaults to deleting the branch created by the
+`create-branch` step in the same job.
+
+| Parameter    | Type         | Default           | Description                             |
+| ------------ | ------------ | ----------------- | --------------------------------------- |
+| `api_key`    | env_var_name | `NEON_API_KEY`    | Env var containing the Neon API Key.    |
+| `project_id` | env_var_name | `NEON_PROJECT_ID` | Env var containing the Neon Project ID. |
+| `branch_id`  | string       | `$NEON_BRANCH_ID` | The ID of the branch to delete.         |
+
+### `reset-branch`
+
+Resets a branch to the latest state of its parent. Useful for refreshing
+persistent staging environments.
+
+| Parameter       | Type         | Required | Description                                               |
+| --------------- | ------------ | -------- | --------------------------------------------------------- |
+| `api_key`       | env_var_name | No       | Env var containing the Neon API Key.                      |
+| `project_id`    | env_var_name | No       | Env var containing the Neon Project ID.                   |
+| `branch_id`     | string       | **Yes**  | The ID or name of the branch to reset.                    |
+| `parent_branch` | string       | No       | The parent branch to reset to (default: original parent). |
+
+## 🌟 Example Workflow
+
+Here is a complete example of a workflow that tests a Node.js application
+against an ephemeral Neon database.
+
+```yaml
+version: 2.1
+
+orbs:
+  neon: dhanushreddy291/neon@1.0 # Use the latest version from the CircleCI Orb Registry
+  node: circleci/node@7.2.1
+
+workflows:
+  build_and_test:
+    jobs:
+      - neon/run-tests:
+          name: test-with-neon
+          context: neon-credentials # Context containing NEON_API_KEY and NEON_PROJECT_ID
+          migrate_command: npx prisma migrate deploy
+          test_command: npm run test:ci
+```
 
 ## Resources
 
-[CircleCI Orb Registry Page](https://circleci.com/developer/orbs/orb/dhanushreddy291/neon-orb-test) - The official registry page of this orb for all versions, executors, commands, and jobs described.
+- [Neon Documentation](https://neon.com/docs)
 
-[CircleCI Orb Docs](https://circleci.com/docs/orb-intro/#section=configuration) - Docs for using, creating, and publishing CircleCI Orbs.
+## Development
 
-### How to Contribute
+- Pack source: `circleci orb pack src > orb.yml`
+- Validate orb: `circleci orb validate orb.yml`
+- Orb source docs: `src/README.md`
 
-We welcome [issues](https://github.com/dhanushreddy291/neon-circle-ci-orb/issues) to and [pull requests](https://github.com/dhanushreddy291/neon-circle-ci-orb/pulls) against this repository!
+### Test Locally
 
-### How to Publish An Update
-1. Merge pull requests with desired changes to the main branch.
-    - For the best experience, squash-and-merge and use [Conventional Commit Messages](https://conventionalcommits.org/).
-2. Find the current version of the orb.
-    - You can run `circleci orb info dhanushreddy291/neon-orb-test | grep "Latest"` to see the current version.
-3. Create a [new Release](https://github.com/dhanushreddy291/neon-circle-ci-orb/releases/new) on GitHub.
-    - Click "Choose a tag" and _create_ a new [semantically versioned](http://semver.org/) tag. (ex: v1.0.0)
-      - We will have an opportunity to change this before we publish if needed after the next step.
-4.  Click _"+ Auto-generate release notes"_.
-    - This will create a summary of all of the merged pull requests since the previous release.
-    - If you have used _[Conventional Commit Messages](https://conventionalcommits.org/)_ it will be easy to determine what types of changes were made, allowing you to ensure the correct version tag is being published.
-5. Now ensure the version tag selected is semantically accurate based on the changes included.
-6. Click _"Publish Release"_.
-    - This will push a new tag and trigger your publishing pipeline on CircleCI.
+Use CircleCI CLI to validate and execute orb jobs locally (Docker required).
 
-### Development Orbs
+1. Pack and validate the orb source:
 
-Prerequisites:
-
-- An initial sevmer deployment must be performed in order for Development orbs to be published and seen in the [Orb Registry](https://circleci.com/developer/orbs).
-
-A [Development orb](https://circleci.com/docs/orb-concepts/#development-orbs) can be created to help with rapid development or testing. To create a Development orb, change the `orb-tools/publish` job in `test-deploy.yml` to be the following:
-
-```yaml
-- orb-tools/publish:
-    orb_name: dhanushreddy291/neon-orb-test
-    vcs_type: << pipeline.project.type >>
-    pub_type: dev
-    # Ensure this job requires all test jobs and the pack job.
-    requires:
-      - orb-tools/pack
-      - command-test
-    context: orb-publishing
-    filters: *filters
+```bash
+circleci orb pack src > orb.yml
+circleci orb validate orb.yml
 ```
 
-The job output will contain a link to the Development orb Registry page. The parameters `enable_pr_comment` and `github_token` can be set to add the relevant publishing information onto a pull request. Please refer to the [orb-tools/publish](https://circleci.com/developer/orbs/orb/circleci/orb-tools#jobs-publish) documentation for more information and options.
+2. Process the local example pipeline:
+
+```bash
+circleci config process .circleci/example-orb-test.yml > .circleci/example-orb-test.processed.yml
+```
+
+3. Execute a specific job locally:
+
+```bash
+circleci local execute -c .circleci/example-orb-test.processed.yml test-create-delete \
+  --env NEON_API_KEY="$NEON_API_KEY" \
+  --env NEON_PROJECT_ID="$NEON_PROJECT_ID"
+```
+
+You can also run:
+
+```bash
+circleci local execute -c .circleci/example-orb-test.processed.yml test-idempotent-create \
+  --env NEON_API_KEY="$NEON_API_KEY" \
+  --env NEON_PROJECT_ID="$NEON_PROJECT_ID"
+```

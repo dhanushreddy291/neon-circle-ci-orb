@@ -1,15 +1,10 @@
 version: 2.1
 
 description: >
-  Sample orb description
-# What will your orb allow users to accomplish?
-# Descriptions should be short, simple, and informative.
+  Neon CircleCI Orb. Provision ephemeral Postgres branches for every CI
+  pipeline run, run migrations and tests against isolated databases, and
+  automatically clean up when finished.
 
-# This information will be displayed in the orb registry and is not mandatory.
 display:
-  home_url: "https://www.example.com/docs"
+  home_url: "https://neon.com"
   source_url: "https://github.com/dhanushreddy291/neon-circle-ci-orb"
-
-# If your orb requires other orbs, you can import them like this. Otherwise remove the "orbs" stanza.
-# orbs:
-#  hello: circleci/hello-build@0.0.5
