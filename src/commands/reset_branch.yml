@@ -26,4 +26,4 @@ steps:
         PARAM_PROJECT_ID: << parameters.project_id >>
         PARAM_BRANCH_ID: << parameters.branch_id >>
         PARAM_PARENT_BRANCH: << parameters.parent_branch >>
-      command: <<include(scripts/reset-branch.sh)>>
+      command: <<include(scripts/reset_branch.sh)>>

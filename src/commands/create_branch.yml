@@ -62,4 +62,4 @@ steps:
         PARAM_SCHEMA_ONLY: "<< parameters.schema_only >>"
         PARAM_GET_AUTH: "<< parameters.get_auth_url >>"
         PARAM_GET_DATA_API: "<< parameters.get_data_api_url >>"
-      command: <<include(scripts/create-branch.sh)>>
+      command: <<include(scripts/create_branch.sh)>>

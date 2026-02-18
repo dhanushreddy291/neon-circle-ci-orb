@@ -3,8 +3,8 @@
 This directory contains the unpacked source for the Neon CircleCI orb.
 
 - `@orb.yml`: top-level orb metadata.
-- `commands/`: reusable Neon API commands (`create-branch`, `delete-branch`,
-  `reset-branch`).
+- `commands/`: reusable Neon API commands (`create_branch`, `delete_branch`,
+  `reset_branch`).
 - `jobs/`: higher-level lifecycle jobs (`run_tests`).
 - `executors/`: bundled executor defaults for orb jobs.
 - `examples/`: registry examples shown to orb consumers.

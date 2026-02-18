@@ -21,10 +21,10 @@ schema validation.
 
 ## 🚀 Features
 
-- **`create-branch`**: Create a new copy-on-write branch from your production or
+- **`create_branch`**: Create a new copy-on-write branch from your production or
   staging database.
-- **`delete-branch`**: Clean up branches after your pipeline finishes.
-- **`reset-branch`**: Reset a long-lived branch (like staging) to the latest
+- **`delete_branch`**: Clean up branches after your pipeline finishes.
+- **`reset_branch`**: Reset a long-lived branch (like staging) to the latest
   production state.
 - **`run_tests`**: A complete, pre-configured job that handles the full
   lifecycle: create branch → run tests → delete branch.
@@ -90,7 +90,7 @@ jobs:
     steps:
       - checkout
 
-      - neon/create-branch:
+      - neon/create_branch:
           project_id: NEON_PROJECT_ID
           # Optional: branch_name: "ci-custom-name"
 
@@ -101,13 +101,13 @@ jobs:
             npm run db:migrate
             npm test
 
-      - neon/delete-branch:
+      - neon/delete_branch:
           when: always
 ```
 
 ## 🔧 Commands
 
-### `create-branch`
+### `create_branch`
 
 Creates a new Neon branch and exports connection variables (`DATABASE_URL`,
 `PGHOST`, `PGPASSWORD`, etc.) to the environment for subsequent steps.
@@ -126,10 +126,10 @@ Creates a new Neon branch and exports connection variables (`DATABASE_URL`,
 | `get_auth_url`     | boolean      | `false`            | Export `NEON_AUTH_URL` when Neon Auth is enabled.    |
 | `get_data_api_url` | boolean      | `false`            | Export `NEON_DATA_API_URL` when Data API is enabled. |
 
-### `delete-branch`
+### `delete_branch`
 
 Deletes a Neon branch. Defaults to deleting the branch created by the
-`create-branch` step in the same job.
+`create_branch` step in the same job.
 
 | Parameter    | Type         | Default           | Description                             |
 | ------------ | ------------ | ----------------- | --------------------------------------- |
@@ -137,7 +137,7 @@ Deletes a Neon branch. Defaults to deleting the branch created by the
 | `project_id` | env_var_name | `NEON_PROJECT_ID` | Env var containing the Neon Project ID. |
 | `branch_id`  | string       | `$NEON_BRANCH_ID` | The ID of the branch to delete.         |
 
-### `reset-branch`
+### `reset_branch`
 
 Resets a branch to the latest state of its parent. Useful for refreshing
 persistent staging environments.

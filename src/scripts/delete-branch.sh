@@ -19,7 +19,7 @@ fi
 BRANCH_ID="${PARAM_BRANCH_ID:-${NEON_BRANCH_ID:-}}"
 if [ -z "$BRANCH_ID" ]; then
   echo "Error: No branch ID provided and NEON_BRANCH_ID is not set."
-  echo "Either pass the 'branch_id' parameter or run 'create-branch' first."
+  echo "Either pass the 'branch_id' parameter or run 'create_branch' first."
   exit 1
 fi
 

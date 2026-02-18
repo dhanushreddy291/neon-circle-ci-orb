@@ -25,9 +25,9 @@ jobs:
       - run:
           name: Validate source tree contains Neon commands
           command: |
-            test -f src/commands/create-branch.yml
-            test -f src/commands/delete-branch.yml
-            test -f src/commands/reset-branch.yml
+            test -f src/commands/create_branch.yml
+            test -f src/commands/delete_branch.yml
+            test -f src/commands/reset_branch.yml
 
   test-create-delete:
     docker:
@@ -36,7 +36,7 @@ jobs:
     steps:
       - checkout
 
-      - neon/create-branch:
+      - neon/create_branch:
           branch_name: "ci-test-create-delete-<< pipeline.number >>"
           ttl_seconds: 600
 
@@ -78,7 +78,7 @@ jobs:
               pg_isready -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" && echo "Connection successful!" || echo "pg_isready check failed"
             fi
 
-      - neon/delete-branch
+      - neon/delete_branch
 
   test-idempotent-create:
     docker:
@@ -87,7 +87,7 @@ jobs:
     steps:
       - checkout
 
-      - neon/create-branch:
+      - neon/create_branch:
           branch_name: "ci-test-idempotent-<< pipeline.number >>"
           ttl_seconds: 600
 
@@ -97,7 +97,7 @@ jobs:
             echo "First creation - Branch ID: $NEON_BRANCH_ID"
             echo "$NEON_BRANCH_ID" > /tmp/first_branch_id
 
-      - neon/create-branch:
+      - neon/create_branch:
           branch_name: "ci-test-idempotent-<< pipeline.number >>"
           ttl_seconds: 600
 
@@ -114,7 +114,7 @@ jobs:
               exit 1
             fi
 
-      - neon/delete-branch
+      - neon/delete_branch
 workflows:
   test-deploy:
     jobs:
