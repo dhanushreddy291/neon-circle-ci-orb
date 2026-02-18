@@ -11,23 +11,19 @@
   </picture>
 </p>
 
-This Orb allows you to easily manage **ephemeral Neon Postgres branches** within
-your CircleCI pipelines.
+This Orb allows you to easily manage **ephemeral Neon Postgres branches** within your CircleCI pipelines.
 
-It enables workflows where you can instantly provision an isolated database for
-every CI run, run migrations and tests, and automatically clean it up
-afterwards. This is perfect for testing, preview environments, and database
-schema validation.
+It enables workflows where you can instantly provision an isolated database for every CI run, run migrations and tests, and automatically clean it up afterwards. This is perfect for testing, preview environments, and database schema validation.
 
-## 🚀 Features
+## 🚀 Available Commands
 
-- **`create_branch`**: Create a new copy-on-write branch from your production or
-  staging database.
+- **`create_branch`**: Create a new copy-on-write branch from your production or staging database.
 - **`delete_branch`**: Clean up branches after your pipeline finishes.
-- **`reset_branch`**: Reset a long-lived branch (like staging) to the latest
-  production state.
-- **`run_tests`**: A complete, pre-configured job that handles the full
-  lifecycle: create branch → run tests → delete branch.
+- **`reset_branch`**: Reset a long-lived branch (like staging) to the latest production state.
+
+## 🚀 Available Jobs
+
+- **`run_tests`**: A complete, pre-configured job that handles the full lifecycle: create branch → run tests → delete branch.
 
 ## ⚙️ Setup
 
@@ -63,9 +59,7 @@ Using this Orb requires a Neon API Key.
 
 ### Option 1: Run all tests with `run_tests`
 
-The easiest way to get started is using the `run_tests` job. It automatically
-creates a branch, runs your migration and test commands, and ensures the branch
-is deleted even if tests fail.
+The easiest way to get started is using the `run_tests` job. It automatically creates a branch, runs your migration and test commands, and ensures the branch is deleted even if tests fail.
 
 ```yaml
 workflows:
@@ -109,8 +103,7 @@ jobs:
 
 ### `create_branch`
 
-Creates a new Neon branch and exports connection variables (`DATABASE_URL`,
-`PGHOST`, `PGPASSWORD`, etc.) to the environment for subsequent steps.
+Creates a new Neon branch and exports connection variables (`DATABASE_URL`, `PGHOST`, `PGPASSWORD`, etc.) to the environment for subsequent steps.
 
 | Parameter          | Type         | Default            | Description                                          |
 | ------------------ | ------------ | ------------------ | ---------------------------------------------------- |
@@ -128,8 +121,7 @@ Creates a new Neon branch and exports connection variables (`DATABASE_URL`,
 
 ### `delete_branch`
 
-Deletes a Neon branch. Defaults to deleting the branch created by the
-`create_branch` step in the same job.
+Deletes a Neon branch. Defaults to deleting the branch created by the `create_branch` step in the same job.
 
 | Parameter    | Type         | Default           | Description                             |
 | ------------ | ------------ | ----------------- | --------------------------------------- |
@@ -139,8 +131,7 @@ Deletes a Neon branch. Defaults to deleting the branch created by the
 
 ### `reset_branch`
 
-Resets a branch to the latest state of its parent. Useful for refreshing
-persistent staging environments.
+Resets a branch to the latest state of its parent. Useful for refreshing persistent staging environments.
 
 | Parameter       | Type         | Required | Description                                               |
 | --------------- | ------------ | -------- | --------------------------------------------------------- |
@@ -151,8 +142,7 @@ persistent staging environments.
 
 ## 🌟 Example Workflow
 
-Here is a complete example of a workflow that tests a Node.js application
-against an ephemeral Neon database.
+Here is a complete example of a workflow that tests a Node.js application against an ephemeral Neon database.
 
 ```yaml
 version: 2.1
@@ -180,6 +170,43 @@ workflows:
 - Pack source: `circleci orb pack src > orb.yml`
 - Validate orb: `circleci orb validate orb.yml`
 - Orb source docs: `src/README.md`
+
+### Publish to CircleCI registry manually
+
+> [!IMPORTANT]
+> Manual publishing is not needed. The Orb is automatically published on every version tag push to GitHub. This section is only for manual releases outside of GitHub. See [How to release](#how-to-release) for the recommended release process that includes automatic publishing.
+
+Run from repository root:
+
+```bash
+circleci orb pack src > orb.yml
+circleci orb validate orb.yml
+```
+
+If this is the first release in the org, run one-time setup:
+
+```bash
+circleci namespace create dhanushreddy291 --org-id <CIRCLECI_ORG_ID>
+circleci orb create dhanushreddy291/neon
+```
+
+Publish a dev version for testing:
+
+```bash
+circleci orb publish orb.yml dhanushreddy291/neon@dev:alpha
+```
+
+Publish a production release:
+
+```bash
+circleci orb publish orb.yml dhanushreddy291/neon@1.0.0
+```
+
+Check published versions:
+
+```bash
+circleci orb info dhanushreddy291/neon
+```
 
 ### Test Locally
 
@@ -213,3 +240,14 @@ circleci local execute -c tests/example-orb-test.processed.yml test-idempotent-c
   --env NEON_API_KEY="$NEON_API_KEY" \
   --env NEON_PROJECT_ID="$NEON_PROJECT_ID"
 ```
+
+## How to release
+
+1. Create a new version tag in GitHub (e.g., `v1.0.0`).
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+2. This will trigger the CircleCI pipeline that automatically packs, validates, and publishes the orb to the CircleCI registry under `dhanushreddy291/neon` with the version `1.0.0`.
