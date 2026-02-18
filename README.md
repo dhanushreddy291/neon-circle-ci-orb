@@ -4,7 +4,7 @@
 [![CircleCI Orb Version](https://badges.circleci.com/orbs/dhanushreddy291/neon.svg)](https://circleci.com/developer/orbs/orb/dhanushreddy291/neon)
 [![GitHub License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/dhanushreddy291/neon-circle-ci-orb/master/LICENSE)
 
-<p align="center">
+<p align="left">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://neon.com/brand/neon-logo-dark-color.svg">
     <img alt="Neon logo" src="https://neon.com/brand/neon-logo-light-color.svg" width="200">
