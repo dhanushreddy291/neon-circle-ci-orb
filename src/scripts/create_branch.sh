@@ -5,14 +5,12 @@ NEON_API_KEY="${!PARAM_API_KEY:-}"
 NEON_PROJECT_ID="${!PARAM_PROJECT_ID:-}"
 
 if [ -z "$NEON_API_KEY" ]; then
-  echo "Error: Neon API key is not set. Please set \
-$NEON_API_KEY in CircleCI project settings."
+  echo "Error: Neon API key is not set (expected in \$$PARAM_API_KEY)."
   exit 1
 fi
 
 if [ -z "$NEON_PROJECT_ID" ]; then
-  echo "Error: Neon Project ID is not set. Please set \
-$NEON_PROJECT_ID in CircleCI project settings."
+  echo "Error: Neon Project ID is not set (expected in \$$PARAM_PROJECT_ID)."
   exit 1
 fi
 
@@ -93,7 +91,7 @@ else
   EXPIRES_AT=""
   if [ "$PARAM_TTL_SECONDS" -gt 0 ] 2>/dev/null; then
     EXPIRES_AT=$(date -u -d "+${PARAM_TTL_SECONDS} seconds" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null \
-      || date -u -v+${PARAM_TTL_SECONDS}S "+%Y-%m-%dT%H:%M:%SZ")
+      || date -u -v+"${PARAM_TTL_SECONDS}"S "+%Y-%m-%dT%H:%M:%SZ")
     echo "Branch TTL: ${PARAM_TTL_SECONDS}s (expires at $EXPIRES_AT)"
   fi
 
@@ -137,7 +135,7 @@ if [ -z "$ENDPOINT_HOST" ] || [ "$ENDPOINT_HOST" = "null" ]; then
   exit 1
 fi
 
-ENDPOINT_HOST_POOLED=$(echo "$ENDPOINT_HOST" | sed "s/${ENDPOINT_ID}/${ENDPOINT_ID}-pooler/")
+ENDPOINT_HOST_POOLED="${ENDPOINT_HOST//${ENDPOINT_ID}/${ENDPOINT_ID}-pooler}"
 
 DB_PASSWORD="$PARAM_PASSWORD"
 if [ -z "$DB_PASSWORD" ]; then

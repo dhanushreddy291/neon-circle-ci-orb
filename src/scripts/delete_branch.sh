@@ -5,14 +5,12 @@ NEON_API_KEY="${!PARAM_API_KEY:-}"
 NEON_PROJECT_ID="${!PARAM_PROJECT_ID:-}"
 
 if [ -z "$NEON_API_KEY" ]; then
-  echo "Error: Neon API key is not set. Please set \
-$NEON_API_KEY in CircleCI project settings."
+  echo "Error: Neon API key is not set (expected in \$$PARAM_API_KEY)."
   exit 1
 fi
 
 if [ -z "$NEON_PROJECT_ID" ]; then
-  echo "Error: Neon Project ID is not set. Please set \
-$NEON_PROJECT_ID in CircleCI project settings."
+  echo "Error: Neon Project ID is not set (expected in \$$PARAM_PROJECT_ID)."
   exit 1
 fi
 
