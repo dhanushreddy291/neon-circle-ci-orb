@@ -195,13 +195,13 @@ circleci orb validate orb.yml
 2. Process the local example pipeline:
 
 ```bash
-circleci config process .circleci/example-orb-test.yml > .circleci/example-orb-test.processed.yml
+circleci config process tests/example-orb-test.yml > tests/example-orb-test.processed.yml
 ```
 
 3. Execute a specific job locally:
 
 ```bash
-circleci local execute -c .circleci/example-orb-test.processed.yml test-create-delete \
+circleci local execute -c tests/example-orb-test.processed.yml test-create-delete \
   --env NEON_API_KEY="$NEON_API_KEY" \
   --env NEON_PROJECT_ID="$NEON_PROJECT_ID"
 ```
@@ -209,7 +209,7 @@ circleci local execute -c .circleci/example-orb-test.processed.yml test-create-d
 You can also run:
 
 ```bash
-circleci local execute -c .circleci/example-orb-test.processed.yml test-idempotent-create \
+circleci local execute -c tests/example-orb-test.processed.yml test-idempotent-create \
   --env NEON_API_KEY="$NEON_API_KEY" \
   --env NEON_PROJECT_ID="$NEON_PROJECT_ID"
 ```
