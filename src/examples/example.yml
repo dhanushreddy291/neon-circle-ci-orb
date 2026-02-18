@@ -7,6 +7,6 @@ usage:
   workflows:
     test:
       jobs:
-        - neon/run-tests:
+        - neon/run_tests:
             migrate_command: npm run db:migrate
             test_command: npm test

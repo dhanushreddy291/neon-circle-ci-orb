@@ -26,7 +26,7 @@ schema validation.
 - **`delete-branch`**: Clean up branches after your pipeline finishes.
 - **`reset-branch`**: Reset a long-lived branch (like staging) to the latest
   production state.
-- **`run-tests`**: A complete, pre-configured job that handles the full
+- **`run_tests`**: A complete, pre-configured job that handles the full
   lifecycle: create branch → run tests → delete branch.
 
 ## ⚙️ Setup
@@ -61,9 +61,9 @@ Using this Orb requires a Neon API Key.
 
 ## 📖 Usage
 
-### Option 1: Run all tests with `run-tests`
+### Option 1: Run all tests with `run_tests`
 
-The easiest way to get started is using the `run-tests` job. It automatically
+The easiest way to get started is using the `run_tests` job. It automatically
 creates a branch, runs your migration and test commands, and ensures the branch
 is deleted even if tests fail.
 
@@ -71,7 +71,7 @@ is deleted even if tests fail.
 workflows:
   test-flow:
     jobs:
-      - neon/run-tests:
+      - neon/run_tests:
           project_id: NEON_PROJECT_ID
           migrate_command: npm i && npm run db:migrate
           test_command: npm test
@@ -164,7 +164,7 @@ orbs:
 workflows:
   build_and_test:
     jobs:
-      - neon/run-tests:
+      - neon/run_tests:
           name: test-with-neon
           context: neon-credentials # Context containing NEON_API_KEY and NEON_PROJECT_ID
           migrate_command: npx prisma migrate deploy

@@ -131,7 +131,7 @@ workflows:
           requires:
             - smoke-test
 
-      - neon/run-tests:
+      - neon/run_tests:
           migrate_command: 'echo ''Running migrations against Neon branch...'' && echo "DATABASE_URL is set: $(echo $DATABASE_URL | head -c 30)..."'
           test_command: 'echo ''Running tests against Neon branch...'' && echo "PGHOST: $PGHOST" && echo ''All tests passed!'''
           ttl_seconds: 600
