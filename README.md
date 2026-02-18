@@ -157,9 +157,39 @@ workflows:
       - neon/run_tests:
           name: test-with-neon
           context: neon-credentials # Context containing NEON_API_KEY and NEON_PROJECT_ID
-          migrate_command: npx prisma migrate deploy
+          executor:
+            name: node/default
+            tag: "24.12"
+          migrate_command: npm ci && npx prisma migrate deploy
           test_command: npm run test:ci
 ```
+
+### Playwright E2E example
+
+Use this setup when your CI job needs to provision an ephemeral Neon branch and run end-to-end tests with Playwright.
+
+```yaml
+version: 2.1
+
+orbs:
+  neon: dhanushreddy291/neon@1.0
+  node: circleci/node@7.2.1
+
+workflows:
+  test-flow:
+    jobs:
+      - neon/run_tests:
+          name: test-with-neon
+          executor:
+            name: node/default
+            tag: "24.12"
+          migrate_command: npm ci && npm run db:migrate && npx playwright install --with-deps chromium
+          test_command: npm test
+```
+
+If you want a complete working project using this pattern, see:
+
+- https://github.com/dhanushreddy291/hono-crud-api
 
 ## Resources
 
