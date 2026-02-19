@@ -3,7 +3,7 @@ version: 2.1
 # Example standalone test pipeline for the Neon orb.
 # Use this when you want to manually validate the dev orb version.
 orbs:
-  neon: dhanushreddy291/neon@1.0.0
+  neon: dhanushreddy291/neon@1.0
 
 jobs:
   test-create-delete:
