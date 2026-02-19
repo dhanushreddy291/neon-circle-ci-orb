@@ -107,9 +107,17 @@ validate_inputs() {
 resolve_branch_name() {
   BRANCH_NAME="$PARAM_BRANCH_NAME"
   if [[ -z "$BRANCH_NAME" ]]; then
-    BRANCH_NAME="${CIRCLE_PIPELINE_NUM:-${CIRCLE_BUILD_NUM:-}}"
-    [[ -n "$BRANCH_NAME" ]] || BRANCH_NAME="local-$(date -u +%Y%m%d%H%M%S)"
-    [[ -z "${CIRCLE_NODE_INDEX:-}" ]] || BRANCH_NAME="${BRANCH_NAME}-${CIRCLE_NODE_INDEX}"
+    local ci_id="${CIRCLE_PIPELINE_NUM:-${CIRCLE_BUILD_NUM:-}}"
+    if [[ -n "$ci_id" ]]; then
+      BRANCH_NAME="circle-ci-${ci_id}"
+    else
+      BRANCH_NAME="local-$(date -u +%Y%m%d%H%M%S)"
+    fi
+
+    # Append parallelism index if applicable.
+    if [[ -n "${CIRCLE_NODE_INDEX:-}" ]]; then
+      BRANCH_NAME="${BRANCH_NAME}-${CIRCLE_NODE_INDEX}"
+    fi
   fi
   echo "Branch name: $BRANCH_NAME"
 }

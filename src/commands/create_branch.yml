@@ -16,7 +16,7 @@ parameters:
     type: string
     default: ""
   branch_name:
-    description: Custom branch name. Leave empty for an auto-generated name (`<CI_PIPELINE_ID>`). If a branch with the same name already exists, it will be reused instead of creating a new one.
+    description: Custom branch name. Leave empty for an auto-generated name (`circle-ci-<PIPELINE_ID>`). If a branch with the same name already exists, it will be reused instead of creating a new one.
     type: string
     default: ""
   role:
