@@ -86,9 +86,9 @@ resolve_branch_id() {
   response=$(neon_api GET "/projects/${NEON_PROJECT_ID}/branches?search=${encoded}")
 
   if is_truthy "$match_id_too"; then
-    filter='.branches[] | select(.name == $n or .id == $n) | .id'
+    filter=".branches[] | select(.name == \$n or .id == \$n) | .id"
   else
-    filter='.branches[] | select(.name == $n) | .id'
+    filter=".branches[] | select(.name == \$n) | .id"
   fi
   echo "$response" | jq -r --arg n "$name" "$filter" 2>/dev/null | head -n1
 }
