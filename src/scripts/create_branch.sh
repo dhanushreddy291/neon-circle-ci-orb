@@ -136,7 +136,7 @@ find_or_create_branch() {
   fi
 
   BRANCH_CREATED="true"
-  local parent_id="" expires_at="" payload create_response
+  local parent_id="" expires_at="" payload create_response schema_only="false"
 
   # Resolve optional parent branch.
   if [[ -n "$PARAM_PARENT_BRANCH" ]]; then
@@ -152,19 +152,23 @@ find_or_create_branch() {
     echo "Branch TTL: ${PARAM_TTL_SECONDS}s (expires at $expires_at)"
   fi
 
+  if is_truthy "$PARAM_SCHEMA_ONLY"; then
+    schema_only="true"
+  fi
+
   # Build the JSON payload with optional fields.
   payload=$(jq -n \
     --arg name        "$BRANCH_NAME" \
     --arg parent_id   "$parent_id" \
     --arg expires_at  "$expires_at" \
-    --arg schema_only "$PARAM_SCHEMA_ONLY" \
+    --argjson schema_only "$schema_only" \
     '{
       branch: { name: $name },
       endpoints: [{ type: "read_write" }]
     }
     | if $parent_id   != "" then .branch.parent_id   = $parent_id            else . end
     | if $expires_at   != "" then .branch.expires_at   = $expires_at          else . end
-    | if $schema_only == "true" then .branch.init_source = "schema-only"      else . end')
+    | if $schema_only then .branch.init_source = "schema-only" else . end')
 
   echo "Creating branch..."
   create_response=$(neon_api POST "/projects/${NEON_PROJECT_ID}/branches" "$payload")
