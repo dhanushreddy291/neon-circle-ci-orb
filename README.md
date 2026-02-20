@@ -66,7 +66,6 @@ workflows:
   test-flow:
     jobs:
       - neon/run_tests:
-          project_id: NEON_PROJECT_ID
           migrate_command: npm i && npm run db:migrate
           test_command: npm test
 ```
@@ -85,7 +84,6 @@ jobs:
       - checkout
 
       - neon/create_branch:
-          project_id: NEON_PROJECT_ID
           # Optional: branch_name: "ci-custom-name"
 
       - run:
@@ -168,6 +166,8 @@ workflows:
 
 Use this setup when your CI job needs to provision an ephemeral Neon branch and run end-to-end tests with Playwright.
 
+> For a complete working project with E2E tests, follow this reference: https://github.com/dhanushreddy291/hono-crud-api
+
 ```yaml
 version: 2.1
 
@@ -186,10 +186,6 @@ workflows:
           migrate_command: npm ci && npm run db:migrate && npx playwright install --with-deps chromium
           test_command: npm test
 ```
-
-If you want a complete working project using this pattern, see:
-
-- https://github.com/dhanushreddy291/hono-crud-api
 
 ## Resources
 
